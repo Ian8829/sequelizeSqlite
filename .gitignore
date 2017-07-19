@@ -1,0 +1,7 @@
+.idea
+yarn.lock
+.DS_Store
+nodeSequelize.iml
+node_modules
+.keep
+

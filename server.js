@@ -123,6 +123,17 @@ app.put('/todos/:id', function(req, res) {
     })
 });
 
+app.post('/users', function(req, res) {
+  const body = _.pick(req.body, 'email', 'password');
+
+  db.user.create(body)
+    .then(user => {
+      res.json(user.toJSON());
+    }, e => {
+      res.status(400).json(e);
+    });
+});
+
 db.sequelize.sync()
   .then(() => {
     app.listen(PORT, function() {

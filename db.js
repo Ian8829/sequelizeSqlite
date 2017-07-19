@@ -4,6 +4,15 @@ const sequelize = new Sequelize(undefined, undefined, undefined, {
   'storage': `${__dirname}/data/dev-todo-api.sqlite`
 });
 
+const db = {};
+
+db.todo = sequelize.import(`${__dirname}/models/todo.js`);
+db.user = sequelize.import(`${__dirname}/models/user.js`);
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+
+module.exports = db;
+
 // const env = process.env.NODE_ENV || 'development';
 //
 // if (env === 'production') {
@@ -17,11 +26,3 @@ const sequelize = new Sequelize(undefined, undefined, undefined, {
 //   });
 // }
 // // for deploy to heroku
-
-const db = {};
-
-db.todo = sequelize.import(`${__dirname}/models/todo.js`);
-db.sequelize = sequelize;
-db.Sequelize = Sequelize;
-
-module.exports = db;

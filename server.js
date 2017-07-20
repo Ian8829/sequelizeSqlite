@@ -134,6 +134,31 @@ app.post('/users', function(req, res) {
     });
 });
 
+// POST /users/login
+app.post('/users/login', function (req, res) {
+  const body = _.pick(req.body, 'email', 'password');
+  const {email, password} = body;
+
+  if (typeof email !== 'string' || typeof password !== 'string') {
+    return res.status(400).send();
+  }
+
+  db.user.findOne({
+    where: {
+      email: body.email
+    }
+  })
+    .then(user => {
+      if (!user) {
+        return res.status(401);
+      }
+
+      res.json(user.toJSON());
+    }, e => {
+      res.status(500).send(e);
+    });
+});
+
 db.sequelize.sync()
   .then(() => {
     app.listen(PORT, function() {

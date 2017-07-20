@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const _ = require('underscore');
 const bcrypt = require('bcrypt');
 const db = require('./db');
+const middleware = require('./middleware')(db);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,7 +17,7 @@ app.get('/', function(req, res) {
 });
 
 // GET /todos?completed=false&q=work
-app.get('/todos', function(req, res) {
+app.get('/todos', middleware.requireAuthentication, (req, res) => {
 	const query = req.query;
 	const where = {};
 
@@ -41,7 +42,7 @@ app.get('/todos', function(req, res) {
 });
 
 // GET /todos/:id
-app.get('/todos/:id', function(req, res) {
+app.get('/todos/:id', middleware.requireAuthentication, (req, res) => {
 	const todoId = parseInt(req.params.id, 10);
 
 	db.todo.findById(todoId)
@@ -57,7 +58,7 @@ app.get('/todos/:id', function(req, res) {
 });
 
 // POST /todos
-app.post('/todos', function(req, res) {
+app.post('/todos', middleware.requireAuthentication, (req, res) => {
 	const body = _.pick(req.body, 'description', 'completed');
 
 	// call create on db.todo
@@ -72,7 +73,7 @@ app.post('/todos', function(req, res) {
 });
 
 // DELETE /todos/:id
-app.delete('/todos/:id', function(req, res) {
+app.delete('/todos/:id', middleware.requireAuthentication, (req, res) => {
 	const todoId = parseInt(req.params.id, 10);
 
 	db.todo.destroy({
@@ -94,7 +95,7 @@ app.delete('/todos/:id', function(req, res) {
 });
 
 // PUT /todos/:id
-app.put('/todos/:id', function(req, res) {
+app.put('/todos/:id', middleware.requireAuthentication, (req, res) => {
 	const todoId = parseInt(req.params.id, 10);
 	const body = _.pick(req.body, 'description', 'completed');
 	const attributes = {};
@@ -124,7 +125,7 @@ app.put('/todos/:id', function(req, res) {
     })
 });
 
-app.post('/users', function(req, res) {
+app.post('/users', (req, res) => {
   const body = _.pick(req.body, 'email', 'password');
 
   db.user.create(body)
@@ -136,9 +137,8 @@ app.post('/users', function(req, res) {
 });
 
 // POST /users/login
-app.post('/users/login', function (req, res) {
+app.post('/users/login', (req, res) => {
   const body = _.pick(req.body, 'email', 'password');
-  const {email, password} = body;
 
   db.user.authenticate(body)
     .then(user => {
@@ -155,7 +155,7 @@ app.post('/users/login', function (req, res) {
     });
 });
 
-db.sequelize.sync()
+db.sequelize.sync({force: true})
   .then(() => {
     app.listen(PORT, function() {
       console.log(`Express listening on port ${PORT}!`);

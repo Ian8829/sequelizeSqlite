@@ -140,23 +140,11 @@ app.post('/users/login', function (req, res) {
   const body = _.pick(req.body, 'email', 'password');
   const {email, password} = body;
 
-  if (typeof email !== 'string' || typeof password !== 'string') {
-    return res.status(400).send();
-  }
-
-  db.user.findOne({
-    where: {
-      email: body.email
-    }
-  })
+  db.user.authenticate(body)
     .then(user => {
-      if (!user || !bcrypt.compareSync(body.password, user.get('password_hash'))) {
-        return res.status(401).send();
-      }
-
       res.json(user.toPublicJSON());
-    }, e => {
-      res.status(500).send();
+    }, () => {
+      res.status(401).send();
     });
 });
 

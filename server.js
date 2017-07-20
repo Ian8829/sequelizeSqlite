@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const _ = require('underscore');
+const bcrypt = require('bcrypt');
 const db = require('./db');
 
 const app = express();
@@ -149,13 +150,13 @@ app.post('/users/login', function (req, res) {
     }
   })
     .then(user => {
-      if (!user) {
-        return res.status(401);
+      if (!user || !bcrypt.compareSync(body.password, user.get('password_hash'))) {
+        return res.status(401).send();
       }
 
-      res.json(user.toJSON());
+      res.json(user.toPublicJSON());
     }, e => {
-      res.status(500).send(e);
+      res.status(500).send();
     });
 });
 

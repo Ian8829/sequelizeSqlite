@@ -34,11 +34,17 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     hooks: {
-      beforeValidate: (user, options) => {
+      beforeValidate: function (user, options) {
         // user.email
         if (typeof user.email === 'string') {
           user.email = user.email.toLowerCase();
         }
+      }
+    },
+    instanceMethods: {
+      toPublicJSON: function () {
+        const json = this.toJSON();
+        return _.pick(json, 'id', 'email', 'createdAt', 'updatedAt');
       }
     }
   });
